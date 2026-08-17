@@ -9,7 +9,7 @@ const editorial = Newsreader({ subsets: ['latin'], style: ['italic'], weight: ['
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--ff-plex' });
 
 export const metadata: Metadata = {
-	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://norvex-bio.vercel.app'),
 	title: copy.siteTitle,
 	description: copy.siteDescription,
 };
