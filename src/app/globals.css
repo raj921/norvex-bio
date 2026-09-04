@@ -103,3 +103,133 @@ body {
 		transition: none;
 	}
 }
+
+/* ---------- Custom pointer (Chrome.tsx) ---------- */
+/* Only hide the native cursor once the custom one is actually mounted. */
+html:has(.cursor-layer) body,
+html:has(.cursor-layer) a,
+html:has(.cursor-layer) button {
+	cursor: none;
+}
+
+.cursor-layer {
+	position: fixed;
+	inset: 0;
+	z-index: 80;
+	pointer-events: none;
+}
+
+.cursor-ring,
+.cursor-dot {
+	position: fixed;
+	top: 0;
+	left: 0;
+	border-radius: 9999px;
+	will-change: transform;
+	transition: opacity 200ms var(--ease-expo-out), background-color 200ms var(--ease-expo-out),
+		border-color 200ms var(--ease-expo-out);
+}
+
+.cursor-ring {
+	height: 34px;
+	width: 34px;
+	border: 1px solid rgb(10 22 51 / 0.35);
+}
+
+.cursor-ring[data-dark='true'] {
+	border-color: rgb(246 247 249 / 0.45);
+}
+
+.cursor-ring[data-hot='true'] {
+	border-color: rgb(37 208 166 / 0.85);
+	background: rgb(37 208 166 / 0.1);
+}
+
+.cursor-dot {
+	height: 5px;
+	width: 5px;
+	background: var(--color-ink);
+}
+
+.cursor-dot[data-dark='true'] {
+	background: var(--color-bio);
+}
+
+/* ---------- Line-mask reveal ---------- */
+.line-mask {
+	display: block;
+	overflow: hidden;
+	padding-bottom: 0.08em;
+}
+
+/* ---------- Marquee ticker ---------- */
+.marquee-track {
+	display: flex;
+	width: max-content;
+	animation: marquee 42s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+	animation-play-state: paused;
+}
+
+@keyframes marquee {
+	to {
+		transform: translate3d(-50%, 0, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.marquee-track {
+		animation: none;
+	}
+}
+
+/* ---------- Spotlight for tilt cards ---------- */
+.spotlight::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	opacity: 0;
+	transition: opacity 400ms var(--ease-expo-out);
+	background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgb(62 99 242 / 0.14), transparent 70%);
+	pointer-events: none;
+}
+
+.spotlight:hover::before {
+	opacity: 1;
+}
+
+.spotlight-dark::before {
+	background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgb(37 208 166 / 0.18), transparent 68%);
+}
+
+/* ---------- Animated underline for text links ---------- */
+.link-underline {
+	background-image: linear-gradient(currentColor, currentColor);
+	background-size: 0% 1px;
+	background-position: 0 100%;
+	background-repeat: no-repeat;
+	transition: background-size 300ms var(--ease-expo-out);
+}
+
+.link-underline:hover {
+	background-size: 100% 1px;
+}
+
+/* ---------- Idle pulse for the live readout ---------- */
+@keyframes live-pulse {
+	0%, 100% { opacity: 1; transform: scale(1); }
+	50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+.live-dot {
+	animation: live-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.live-dot {
+		animation: none;
+	}
+}

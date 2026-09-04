@@ -29,6 +29,16 @@ export const copy = {
 		specimen: 'SPCAS9 TERNARY COMPLEX · PDB 4OO8 · 1,301 RESIDUES',
 	},
 
+	ticker: [
+		'DE NOVO BINDERS',
+		'DIFFUSION BACKBONES',
+		'SUB-ANGSTROM SCORING',
+		'AFFINITY MATURATION',
+		'DEVELOPABILITY BY DESIGN',
+		'48H MODEL RETRAIN',
+		'PDB 4OO8',
+	],
+
 	science: {
 		id: 'science',
 		kicker: 'The science',

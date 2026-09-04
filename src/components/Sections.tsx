@@ -6,7 +6,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight } from 'lucide-react';
 import { copy } from '@/lib/copy';
-import { EXPO_OUT, prefersReducedMotion, useReveal } from '@/lib/motion';
+import { EXPO_OUT, prefersReducedMotion, useLineReveal, useMagnetic, useReveal, useTilt } from '@/lib/motion';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,15 +57,28 @@ function IconGraph({ size = 22 }: { size?: number }) {
 
 const ICONS = { Helix: IconHelix, Lattice: IconLattice, Flask: IconFlask, Graph: IconGraph } as const;
 
-function SectionHead({ kicker, title, dark }: { kicker: string; title: string; dark?: boolean }) {
+function SectionHead({ kicker, title, dark, center }: { kicker: string; title: string; dark?: boolean; center?: boolean }) {
+	// Titles reveal line-by-line out of a clip mask — the single most "awarded"
+	// typographic move on the site, and it degrades to plain text with no motion.
+	const ref = useLineReveal<HTMLHeadingElement>();
+	const words = title.split(' ');
+	const mid = Math.ceil(words.length / 2);
+	const lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')].filter(Boolean);
 	return (
 		<>
-			<p className={`kicker flex items-center gap-3 ${dark ? 'text-paper/40' : 'text-ink/50'}`}>
+			<p className={`kicker flex items-center gap-3 ${center ? 'justify-center' : ''} ${dark ? 'text-paper/40' : 'text-ink/50'}`}>
 				<span className="inline-block h-px w-8 bg-bio" aria-hidden />
 				{kicker}
 			</p>
-			<h2 className="mt-5 max-w-[18ch] font-display text-4xl font-semibold leading-[1.08] tracking-[-0.02em] md:text-5xl">
-				{title}
+			<h2
+				ref={ref}
+				className={`mt-5 max-w-[18ch] font-display text-4xl font-semibold leading-[1.08] tracking-[-0.02em] md:text-5xl ${center ? 'mx-auto' : ''}`}
+			>
+				{lines.map(line => (
+					<span key={line} className="line-mask">
+						<span data-line-inner className="block">{line}</span>
+					</span>
+				))}
 			</h2>
 		</>
 	);
@@ -217,7 +230,7 @@ export function Journey() {
 	}, []);
 
 	return (
-		<section id={copy.journey.id} ref={sectionRef} className="overflow-hidden bg-ink py-28 text-paper md:py-40">
+		<section id={copy.journey.id} ref={sectionRef} data-surface="dark" className="overflow-hidden bg-ink py-28 text-paper md:py-40">
 			<div className="mx-auto max-w-[1240px] px-6">
 				<div className="grid items-center gap-14 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
 					<div ref={head}>
@@ -238,7 +251,7 @@ export function Journey() {
 							type="button"
 							onClick={() => setActive(index)}
 							aria-pressed={active === index}
-							className={`group min-h-[220px] rounded-3xl border p-5 text-left transition-all duration-500 active:scale-[0.99] ${active === index ? 'border-bio/70 bg-paper/[0.1]' : 'border-paper/10 bg-paper/[0.03] hover:border-paper/25 hover:bg-paper/[0.06]'}`}
+							className={`spotlight spotlight-dark group relative min-h-[220px] overflow-hidden rounded-3xl border p-5 text-left transition-all duration-500 hover:-translate-y-1 active:scale-[0.99] ${active === index ? 'border-bio/70 bg-paper/[0.1]' : 'border-paper/10 bg-paper/[0.03] hover:border-paper/25 hover:bg-paper/[0.06]'}`}
 						>
 							<div className="flex items-center justify-between font-mono text-[10px] tracking-[0.18em]">
 								<span className={active === index ? 'text-bio' : 'text-paper/40'}>{step.n}</span>
@@ -300,7 +313,7 @@ export function Platform() {
 					</svg>
 					<ol ref={grid} className="relative grid gap-10 md:grid-cols-2 lg:grid-cols-4">
 						{copy.platform.steps.map(s => (
-							<li key={s.n} className="group">
+							<li key={s.n} className="group relative">
 								<div className="flex items-center gap-3">
 									<span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-accent bg-paper font-mono text-xs text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-paper">
 										{s.n}
@@ -320,6 +333,46 @@ export function Platform() {
 
 /* ---------------- Capabilities ---------------- */
 
+type CapabilityItem = (typeof copy.capabilities.items)[number];
+
+function CapabilityCard({ item, index }: { item: CapabilityItem; index: number }) {
+	// Feature card is the only one that earns 3D tilt; the rest get the cheaper
+	// spotlight so the section still feels alive without four tracked surfaces.
+	const tilt = useTilt<HTMLElement>(index === 0 ? 4.5 : 3);
+	const Icon = ICONS[item.icon];
+	const tone =
+		index === 0
+			? 'border-ink bg-ink text-paper lg:col-span-7 lg:row-span-3'
+			: index === 1
+				? 'border-accent/20 bg-accent/[0.08] lg:col-span-5'
+				: index === 2
+					? 'border-mist bg-white/75 lg:col-span-5'
+					: 'border-bio/20 bg-bio/[0.09] lg:col-span-5';
+	return (
+		<article
+			ref={tilt}
+			{...(index === 0 ? { 'data-surface': 'dark' } : {})}
+			className={`spotlight ${index === 0 ? 'spotlight-dark' : ''} group relative overflow-hidden rounded-3xl border p-7 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-[0_30px_80px_-40px_rgb(11_42_107/0.55)] ${tone}`}
+		>
+			<div className={`relative z-10 inline-flex rounded-2xl p-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-6 ${index === 0 ? 'bg-paper/10 text-bio group-hover:bg-bio/15' : 'bg-mist/50 text-deep group-hover:bg-accent/10 group-hover:text-accent'}`}>
+				<Icon size={22} />
+			</div>
+			<h3 className={`relative z-10 mt-5 font-display text-xl font-semibold transition-colors duration-200 ${index === 0 ? 'lg:mt-24 group-hover:text-bio' : 'group-hover:text-accent'}`}>{item.title}</h3>
+			<p className={`relative z-10 mt-2 max-w-[42ch] text-sm leading-relaxed ${index === 0 ? 'text-paper/60' : 'text-ink/60'}`}>{item.body}</p>
+			<span
+				aria-hidden
+				className={`relative z-10 mt-6 block h-px w-8 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-16 ${index === 0 ? 'bg-bio/70' : 'bg-accent/50'}`}
+			/>
+			{index === 0 && (
+				<div className="pointer-events-none absolute -bottom-12 -right-6 h-64 w-64 rounded-full border border-bio/20 transition-transform duration-700 group-hover:scale-110" aria-hidden>
+					<div className="absolute inset-8 rounded-full border border-paper/10" />
+					<div className="absolute inset-20 rounded-full bg-bio/15 blur-3xl" />
+				</div>
+			)}
+		</article>
+	);
+}
+
 export function Capabilities() {
 	const head = useReveal<HTMLDivElement>();
 	const grid = useReveal<HTMLDivElement>({ stagger: true });
@@ -329,27 +382,9 @@ export function Capabilities() {
 				<SectionHead kicker={copy.capabilities.kicker} title={copy.capabilities.title} />
 			</div>
 			<div ref={grid} className="mt-14 grid gap-5 lg:grid-cols-12 lg:grid-rows-3">
-				{copy.capabilities.items.map((item, index) => {
-					const Icon = ICONS[item.icon];
-					return (
-						<article
-							key={item.title}
-							className={`group relative overflow-hidden rounded-3xl border p-7 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ${index === 0 ? 'border-ink bg-ink text-paper lg:col-span-7 lg:row-span-3' : index === 1 ? 'border-accent/20 bg-accent/[0.08] lg:col-span-5' : index === 2 ? 'border-mist bg-white/75 lg:col-span-5' : 'border-bio/20 bg-bio/[0.09] lg:col-span-5'}`}
-						>
-								<div className={`relative z-10 inline-flex rounded-2xl p-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-6 ${index === 0 ? 'bg-paper/10 text-bio group-hover:bg-bio/15' : 'bg-mist/50 text-deep group-hover:bg-accent/10 group-hover:text-accent'}`}>
-									<Icon size={22} />
-								</div>
-							<h3 className={`relative z-10 mt-5 font-display text-xl font-semibold transition-colors duration-200 ${index === 0 ? 'lg:mt-24 group-hover:text-bio' : 'group-hover:text-accent'}`}>{item.title}</h3>
-							<p className={`relative z-10 mt-2 max-w-[42ch] text-sm leading-relaxed ${index === 0 ? 'text-paper/60' : 'text-ink/60'}`}>{item.body}</p>
-							{index === 0 && (
-								<div className="pointer-events-none absolute -bottom-12 -right-6 h-64 w-64 rounded-full border border-bio/20 transition-transform duration-700 group-hover:scale-110" aria-hidden>
-									<div className="absolute inset-8 rounded-full border border-paper/10" />
-									<div className="absolute inset-20 rounded-full bg-bio/15 blur-3xl" />
-								</div>
-							)}
-						</article>
-					);
-				})}
+				{copy.capabilities.items.map((item, index) => (
+					<CapabilityCard key={item.title} item={item} index={index} />
+				))}
 			</div>
 		</section>
 	);
@@ -413,14 +448,14 @@ export function Stats() {
 	}, []);
 
 	return (
-		<section id={copy.stats.id} ref={sectionRef} className="bg-ink py-28 text-paper md:py-40">
+		<section id={copy.stats.id} ref={sectionRef} data-surface="dark" className="bg-ink py-28 text-paper md:py-40">
 			<div className="mx-auto max-w-[1240px] px-6">
 				<div ref={head}>
 					<SectionHead kicker={copy.stats.kicker} title={copy.stats.title} />
 				</div>
 				<div ref={grid} className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-paper/10 bg-paper/10 sm:grid-cols-2 lg:grid-cols-4">
 					{copy.stats.items.map(s => (
-						<div key={s.label} className="bg-ink p-7 transition-colors duration-300 hover:bg-paper/[0.06]">
+						<div key={s.label} className="spotlight spotlight-dark relative bg-ink p-7 transition-colors duration-300 hover:bg-paper/[0.06]">
 							<p
 								className="font-display text-5xl font-semibold tracking-tight tabular-nums text-paper"
 								data-count={s.value}
@@ -443,15 +478,17 @@ export function Stats() {
 
 export function Cta() {
 	const inner = useReveal<HTMLDivElement>();
+	const button = useMagnetic<HTMLAnchorElement>(0.3);
 	return (
 		<section id={copy.cta.id} className="px-6 pb-10 pt-4">
-			<div className="relative mx-auto max-w-[1240px] overflow-hidden rounded-[2.5rem] bg-ink text-paper">
+			<div data-surface="dark" className="relative mx-auto max-w-[1240px] overflow-hidden rounded-[2.5rem] bg-ink text-paper">
 				{/* single saturated glow — the only gradient allowed in UI (contract §4C) */}
 				<div className="absolute -top-1/3 right-[-10%] h-[480px] w-[480px] rounded-full bg-accent/25 blur-[120px]" aria-hidden />
 				<div ref={inner} className="relative px-8 py-24 text-center md:py-32">
-					<SectionHead kicker={copy.cta.kicker} title={copy.cta.title} dark />
+					<SectionHead kicker={copy.cta.kicker} title={copy.cta.title} dark center />
 					<p className="mx-auto mt-6 max-w-[46ch] text-lg leading-relaxed text-paper/60">{copy.cta.body}</p>
 					<a
+						ref={button}
 						href={`mailto:${copy.cta.email}`}
 						className="group mt-10 inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-sm font-semibold text-paper transition-all duration-200 hover:scale-[1.04] hover:bg-bio hover:text-ink hover:shadow-[0_8px_32px_-8px_rgb(37_208_166/0.6)] active:scale-[0.97]"
 					>
@@ -463,7 +500,7 @@ export function Cta() {
 					<span>{copy.footer.pdb}</span>
 					<div className="flex items-center gap-5">
 						{copy.footer.links.map(l => (
-							<Link key={l.href} href={l.href} className="transition-colors duration-200 hover:text-bio">
+							<Link key={l.href} href={l.href} className="link-underline transition-colors duration-200 hover:text-bio">
 								{l.label}
 							</Link>
 						))}

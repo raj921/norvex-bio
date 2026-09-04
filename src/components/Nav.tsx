@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { copy } from '@/lib/copy';
+import { useMagnetic } from '@/lib/motion';
 
 function LogoMark({ className }: { className?: string }) {
 	return (
@@ -21,6 +22,7 @@ function LogoMark({ className }: { className?: string }) {
 }
 
 export function Nav() {
+	const ctaRef = useMagnetic<HTMLAnchorElement>(0.25);
 	const [scrolled, setScrolled] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [activeSection, setActiveSection] = useState('top');
@@ -67,10 +69,10 @@ export function Nav() {
 	const solid = scrolled || menuOpen;
 
 	return (
-		<header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${solid ? 'border-b border-mist bg-paper/85 text-ink backdrop-blur-md' : 'text-paper'}`}>
-			<div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between px-6">
-				<a href="#top" onClick={closeMenu} className="flex items-center gap-2.5">
-					<LogoMark className="h-7 w-7" />
+		<header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${solid ? 'border-b border-mist/80 bg-paper/70 text-ink shadow-[0_10px_40px_-30px_rgb(10_22_51/0.5)] backdrop-blur-xl backdrop-saturate-150' : 'text-paper'}`}>
+			<div className={`mx-auto flex max-w-[1240px] items-center justify-between px-6 transition-[height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${solid ? 'h-14' : 'h-20'}`}>
+				<a href="#top" onClick={closeMenu} className="group/logo flex items-center gap-2.5">
+					<LogoMark className="h-7 w-7 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/logo:rotate-[10deg]" />
 					<span className="font-display font-semibold tracking-tight">{copy.company}</span>
 				</a>
 				<nav aria-label="Primary" className={`hidden items-center gap-8 text-sm md:flex ${solid ? 'text-ink/70' : 'text-paper/70'}`}>
@@ -86,6 +88,7 @@ export function Nav() {
 					))}
 				</nav>
 				<a
+					ref={ctaRef}
 					href="#contact"
 					onClick={closeMenu}
 					className={`hidden rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-[1.04] active:scale-[0.97] md:inline-flex ${solid ? 'bg-ink text-paper hover:bg-accent' : 'bg-paper text-ink hover:bg-bio'}`}

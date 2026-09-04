@@ -4,7 +4,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import { copy } from '@/lib/copy';
-import { EXPO_OUT, prefersReducedMotion } from '@/lib/motion';
+import { EXPO_OUT, prefersReducedMotion, useMagnetic } from '@/lib/motion';
 
 // ponytail: static fallback is CSS/SVG constellation, not a rendered AVIF still.
 // Ceiling: hero degrades to abstract art rather than the actual molecule.
@@ -64,19 +64,24 @@ function useShouldRender3D() {
 
 export function Hero() {
 	const render3D = useShouldRender3D();
+	const primaryCta = useMagnetic<HTMLAnchorElement>(0.28);
+	const secondaryCta = useMagnetic<HTMLAnchorElement>(0.22);
 
 	useEffect(() => {
 		if (prefersReducedMotion()) return;
-		const tween = gsap.fromTo(
+		const tl = gsap.timeline({ delay: 0.12 });
+		tl.from('[data-hero-line]', { yPercent: 118, duration: 1.15, ease: EXPO_OUT, stagger: 0.08 }, 0.1);
+		tl.fromTo(
 			'.hero-reveal',
 			{ opacity: 0, y: 24 },
-			{ opacity: 1, y: 0, duration: 1, ease: EXPO_OUT, stagger: 0.09, delay: 0.15 },
+			{ opacity: 1, y: 0, duration: 1, ease: EXPO_OUT, stagger: 0.09 },
+			0,
 		);
-		return () => { tween.kill(); };
+		return () => { tl.kill(); };
 	}, []);
 
 	return (
-		<section id="top" className="relative flex min-h-[100dvh] items-center overflow-hidden bg-ink text-paper">
+		<section id="top" data-surface="dark" className="relative flex min-h-[100dvh] items-center overflow-hidden bg-ink text-paper">
 			<div data-nav-sentinel aria-hidden className="absolute left-0 top-0 h-px w-px" />
 			<div className="hero-grid absolute inset-0" aria-hidden />
 			<div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/80 to-transparent" aria-hidden />
@@ -92,21 +97,28 @@ export function Hero() {
 						<span className="inline-block h-px w-8 bg-bio" aria-hidden />
 						{copy.hero.kicker}
 					</p>
-					<h1 className="hero-reveal mt-6 font-display text-[clamp(2.75rem,6vw,4.5rem)] font-semibold leading-[1.04] tracking-[-0.02em]">
-						{copy.hero.headline[0]}
-						<br />
-						<em className="font-editorial font-normal italic text-bio">{copy.hero.headline[1]}</em>{' '}
-						{copy.hero.headline[2]}
+					<h1 className="mt-6 font-display text-[clamp(2.75rem,6vw,4.5rem)] font-semibold leading-[1.04] tracking-[-0.02em]">
+						<span className="line-mask">
+							<span data-hero-line className="block">{copy.hero.headline[0]}</span>
+						</span>
+						<span className="line-mask">
+							<span data-hero-line className="block">
+								<em className="font-editorial font-normal italic text-bio">{copy.hero.headline[1]}</em>{' '}
+								{copy.hero.headline[2]}
+							</span>
+						</span>
 					</h1>
 					<p className="hero-reveal mt-7 max-w-[46ch] text-lg leading-relaxed text-paper/70">{copy.hero.sub}</p>
 					<div className="hero-reveal mt-10 flex flex-wrap items-center gap-4">
 						<a
+							ref={primaryCta}
 							href="#platform"
 							className="rounded-full bg-paper px-6 py-3 text-sm font-medium text-ink transition-all duration-200 hover:scale-[1.04] hover:bg-bio hover:shadow-[0_10px_36px_-10px_rgb(37_208_166/0.55)] active:scale-[0.97]"
 						>
 							{copy.hero.primaryCta}
 						</a>
 						<a
+							ref={secondaryCta}
 							href="#science"
 							className="rounded-full border border-paper/25 px-6 py-3 text-sm font-medium text-paper transition-all duration-200 hover:scale-[1.04] hover:border-bio hover:text-bio active:scale-[0.97]"
 						>
@@ -119,7 +131,10 @@ export function Hero() {
 			<div className="hero-reveal pointer-events-none absolute bottom-16 right-8 hidden w-52 rounded-3xl border border-paper/15 bg-paper/[0.08] p-4 backdrop-blur-md lg:block">
 				<div className="flex items-center justify-between font-mono text-[9px] tracking-[0.18em] text-paper/45">
 					<span>MODEL READOUT</span>
-					<span className="text-bio">LIVE</span>
+					<span className="flex items-center gap-1.5 text-bio">
+						<span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-bio" />
+						LIVE
+					</span>
 				</div>
 				<div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4">
 					<div>
