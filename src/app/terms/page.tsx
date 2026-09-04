@@ -21,28 +21,28 @@ const sections = [
 	},
 	{
 		h: 'Contact',
-		p: 'Questions about these terms can go to hello@norvxbio.example.',
+		p: 'Questions about these terms can go to hello@norvexbio.example.',
 	},
 ];
 
 export default function TermsPage() {
 	return (
 		<main className="mx-auto max-w-[1240px] px-6 pb-28 pt-28">
-			<div className="flex items-center justify-between font-mono text-[11px] tracking-[0.18em] text-ink/45">
-				<Link href="/" className="transition-colors duration-200 hover:text-accent">
+			<div className="flex items-center justify-between font-mono text-[11px] tracking-[0.18em] text-paper/45">
+				<Link href="/" className="transition-colors duration-200 hover:text-bio">
 					← NORVEX BIO
 				</Link>
 				<span>LEGAL · TERMS</span>
 			</div>
 			<h1 className="mt-10 font-display text-4xl font-semibold tracking-[-0.02em] md:text-5xl">Terms of use.</h1>
-			<p className="mt-5 max-w-[65ch] text-lg leading-relaxed text-ink/65">
+			<p className="mt-5 max-w-[65ch] text-lg leading-relaxed text-paper/65">
 				Short, readable rules for using this website. If anything here is unclear, ask us before relying on it.
 			</p>
-			<div className="mt-12 max-w-[65ch] space-y-10 border-t border-mist pt-10">
+			<div className="mt-12 max-w-[65ch] space-y-10 border-t border-paper/15 pt-10">
 				{sections.map(s => (
 					<section key={s.h}>
 						<h2 className="font-display text-xl font-semibold">{s.h}</h2>
-						<p className="mt-2 leading-relaxed text-ink/65">{s.p}</p>
+						<p className="mt-2 leading-relaxed text-paper/65">{s.p}</p>
 					</section>
 				))}
 			</div>
